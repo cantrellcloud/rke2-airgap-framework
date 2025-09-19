@@ -1,0 +1,4 @@
+quay.io/metallb/controller:v0.15.2
+quay.io/metallb/speaker:v0.15.2
+ghcr.io/projectcontour/contour:v1.33.0
+docker.io/envoyproxy/envoy:v1.34.1
