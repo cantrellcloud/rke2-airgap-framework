@@ -34,7 +34,8 @@ template:
 	sudo scripts/rke2-ubuntu-node.sh --template --version $(VERSION) --install-url $(INSTALL_URL)
 
 stage1:
-	sudo scripts/get-iface.sh && scripts/rke2-ubuntu-node.sh --role $(ROLE) --hostname $(HOSTNAME) --iface $(IFACE) --ip-cidr $(IP_CIDR) --gw $(GW) --dns $(DNS)
+	sudo scripts/get-iface.sh
+	sudo scripts/rke2-ubuntu-node.sh --role $(ROLE) --hostname $(HOSTNAME) --iface $(IFACE) --ip-cidr $(IP_CIDR) --gw $(GW) --dns $(DNS)
 
 stage2:
 	sudo scripts/rke2-ubuntu-node.sh --images $(IMAGES_LIST) --ca $(CA_BUNDLE)
