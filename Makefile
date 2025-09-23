@@ -34,18 +34,18 @@ template:
 	sudo scripts/rke2-ubuntu-node.sh --template --version $(VERSION) --install-url $(INSTALL_URL)
 
 stage1:
-	cd scripts && sudo ./rke2-ubuntu-node.sh --role $(ROLE) --hostname $(HOSTNAME) --iface $(IFACE) --ip-cidr $(IP_CIDR) --gw $(GW) --dns $(DNS)
+	sudo scripts/rke2-ubuntu-node.sh --role $(ROLE) --hostname $(HOSTNAME) --iface $(IFACE) --ip-cidr $(IP_CIDR) --gw $(GW) --dns $(DNS)
 
 stage2:
-	cd scripts && sudo ./rke2-ubuntu-node.sh --images $(IMAGES_LIST) --ca $(CA_BUNDLE)
+	sudo scripts/rke2-ubuntu-node.sh --images $(IMAGES_LIST) --ca $(CA_BUNDLE)
 
 cluster-server:
-	cd scripts && sudo ./rke2-ubuntu-node.sh --role server --hostname $(HOSTNAME) --iface $(IFACE) --ip-cidr $(IP_CIDR) --gw $(GW) --dns $(DNS)
-	cd scripts && sudo ./rke2-ubuntu-node.sh --images $(IMAGES_LIST) --ca $(CA_BUNDLE)
+	sudo scripts/rke2-ubuntu-node.sh --role server --hostname $(HOSTNAME) --iface $(IFACE) --ip-cidr $(IP_CIDR) --gw $(GW) --dns $(DNS)
+	sudo scripts/rke2-ubuntu-node.sh --images $(IMAGES_LIST) --ca $(CA_BUNDLE)
 
 cluster-agent:
-	cd scripts && sudo ./rke2-ubuntu-node.sh --role agent --hostname $(HOSTNAME) --iface $(IFACE) --ip-cidr $(IP_CIDR) --gw $(GW) --dns $(DNS)
-	cd scripts && sudo ./rke2-ubuntu-node.sh --role agent --server-url $(SERVER_URL) --token-file $(TOKEN_FILE) --images $(IMAGES_LIST) --ca $(CA_BUNDLE)
+	sudo scripts/rke2-ubuntu-node.sh --role agent --hostname $(HOSTNAME) --iface $(IFACE) --ip-cidr $(IP_CIDR) --gw $(GW) --dns $(DNS)
+	sudo scripts/rke2-ubuntu-node.sh --role agent --server-url $(SERVER_URL) --token-file $(TOKEN_FILE) --images $(IMAGES_LIST) --ca $(CA_BUNDLE)
 
 addons:
 	kubectl apply -f examples/manifests/metallb-namespace.yaml
@@ -73,19 +73,19 @@ uninstall-addons:
 	kubectl delete -f examples/manifests/metallb-namespace.yaml --ignore-not-found
 
 mirror-pull:
-	cd scripts && ./pull-all.sh
+	scripts/pull-all.sh
 
 mirror-push:
-	cd scripts && DEST_ROOT=$(DEST_ROOT) ./push-all.sh
+	DEST_ROOT=$(DEST_ROOT) scripts/push-all.sh
 
 mirror-verify:
-	cd scripts && ./verify-mirror.sh $(IMAGES_LIST)
+	scripts/verify-mirror.sh $(IMAGES_LIST)
 
 mirror-compare:
-	cd scripts && ./mirror-compare.sh $(IMAGES_LIST)
+	scripts/mirror-compare.sh $(IMAGES_LIST)
 
 node-config:
-	cd scripts && sudo ./config-rke2-nodes.sh --role $(ROLE) --user $(REG_USER) --pass '$(REG_PASS)' -r $(REGISTRY_ROOT) -l $(IMAGES_LIST) -c $(CA_BUNDLE)
+	sudo scripts/config-rke2-nodes.sh --role $(ROLE) --user $(REG_USER) --pass '$(REG_PASS)' -r $(REGISTRY_ROOT) -l $(IMAGES_LIST) -c $(CA_BUNDLE)
 
 install-completion:
 	sudo install -m 0644 completion/rke2-ubuntu-node.sh /etc/bash_completion.d/rke2-ubuntu-node.sh || true
