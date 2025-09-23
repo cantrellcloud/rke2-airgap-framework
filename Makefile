@@ -10,8 +10,8 @@ IMAGES_LIST   ?= ./rke2-mirror/lists/images.all.txt
 CA_BUNDLE     ?= examples/kuberegistry-ca.crt
 
 ROLE          ?= server
-HOSTNAME      ?= rke2-node
-IFACE         ?= eno1
+HOSTNAME      ?= j64manager01
+IFACE         ?= 
 IP_CIDR       ?= 10.0.4.101/24
 GW            ?= 10.0.4.1
 DNS           ?= 10.0.0.10,1.1.1.1
@@ -34,7 +34,7 @@ template:
 	sudo scripts/rke2-ubuntu-node.sh --template --version $(VERSION) --install-url $(INSTALL_URL)
 
 stage1:
-	sudo scripts/rke2-ubuntu-node.sh --role $(ROLE) --hostname $(HOSTNAME) --iface $(IFACE) --ip-cidr $(IP_CIDR) --gw $(GW) --dns $(DNS)
+	sudo scripts/get-iface.sh && scripts/rke2-ubuntu-node.sh --role $(ROLE) --hostname $(HOSTNAME) --iface $(IFACE) --ip-cidr $(IP_CIDR) --gw $(GW) --dns $(DNS)
 
 stage2:
 	sudo scripts/rke2-ubuntu-node.sh --images $(IMAGES_LIST) --ca $(CA_BUNDLE)
