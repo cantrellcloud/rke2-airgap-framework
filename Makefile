@@ -35,7 +35,7 @@ template:
 
 stage1:
 	scripts/get-iface.sh
-	sudo scripts/rke2-ubuntu-node.sh --role ${ROLE} --hostname ${HOSTNAME} --iface ${IFACE} --ip-cidr ${IP_CIDR} --gw ${GW} --dns ${DNS}
+	sudo scripts/rke2-ubuntu-node.sh --role ${ROLE} --hostname ${HOSTNAME} --ip-cidr ${IP_CIDR} --gw ${GW} --dns ${DNS}
 
 stage2:
 	sudo scripts/rke2-ubuntu-node.sh --images ${IMAGES_LIST} --ca ${CA_BUNDLE}
