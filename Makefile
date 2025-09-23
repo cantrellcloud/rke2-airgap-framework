@@ -31,7 +31,7 @@ help:
 	@echo "         install-completion, stage1-tui, kubeconfig-export, install-doctor, start-doctor-now, uninstall-doctor, build-deb"
 
 template:
-	sudo ./scripts/rke2-ubuntu-node.sh --template --version $(VERSION) --install-url $(INSTALL_URL)
+	sudo scripts/rke2-ubuntu-node.sh --template --version $(VERSION) --install-url $(INSTALL_URL)
 
 stage1:
 	cd scripts && sudo ./rke2-ubuntu-node.sh --role $(ROLE) --hostname $(HOSTNAME) --iface $(IFACE) --ip-cidr $(IP_CIDR) --gw $(GW) --dns $(DNS)
