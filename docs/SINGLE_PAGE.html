@@ -1,0 +1,88 @@
+
+<!doctype html>
+<html><head><meta charset="utf-8"><title>RKE2 Air-Gap QuickStart</title>
+<style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;margin:40px;line-height:1.5}
+code,pre{background:#f6f8fa;border:1px solid #eaecef;padding:8px;border-radius:6px;display:block;overflow:auto}
+h1,h2{margin-top:1.2em}
+.small{color:#666;font-size:0.9em}</style></head>
+<body>
+<h1>RKE2 Air-Gap Framework — QuickStart</h1>
+<p class="small">Template → Stage1 → Reboot → Stage2 → Verify → Addons → whoami</p>
+<h2>Flags (quick reference)</h2>
+<h3>Flags (quick reference) (what each flag does)</h3>
+<br>
+<p>All flags can be provided as CLI args or via environment variables (see <code>\1</code>).  </p>
+<p>Flags are **alphabetical** here for quick scanning.</p>
+<br>
+<ul>
+<li>`--allow-leaf-ca` — Skip CA:TRUE enforcement for `--ca`.</li>
+<li>`--ca <path>` — Issuing CA bundle (PEM). Copied to `/etc/rancher/rke2/kuberegistry-ca.crt`.</li>
+<li>`--dns <ip1,ip2,...>` — DNS servers for netplan.</li>
+<li>`--gw <ip>` — Default gateway for netplan.</li>
+<li>`--hostname <name>` — Hostname during Stage 1.</li>
+<li>`--iface <name>` — Primary NIC (e.g., `eno1`).</li>
+<li>`--images <file>` — Image list to pre‑warm containerd.</li>
+<li>`--install-url <url>` — Source of the RKE2 installer (template mode).</li>
+<li>`--ip-cidr <addr/cidr>` — Static IPv4/CIDR for netplan.</li>
+<li>`--pass <string>` — Registry password for containerd pulls.</li>
+<li>`--registry <host/prefix>` — Registry prefix (e.g., `kuberegistry.dev.kube/rke2`).</li>
+<li>`--role <server|agent>` — Node role.</li>
+<li>`--server-url <https://ip:9345>` — RKE2 server for agents to join.</li>
+<li>`--skip-verify` — Skip post‑install checks.</li>
+<li>`--template` — Online template prep mode.</li>
+<li>`--token <string>` — Cluster join token.</li>
+<li>`--token-file <path>` — File containing the join token.</li>
+<li>`--user <string>` — Registry username.</li>
+<li>`--version <rke2-version>` — RKE2 version for the cached installer.</li>
+</ul>
+<br>
+<h3>Design & how the framework works</h3>
+<br>
+<ul>
+<li>**Template mode (online once)** caches the official RKE2 installer to `/opt/rke2/get.rke2.sh` and primes Ubuntu 24.04 (modules/sysctls/swap).</li>
+<li>**Stage 1 (offline)** gathers role + static IP/DNS/GW (flags or prompts), writes netplan, applies OS tuning, reboots.</li>
+<li>**Stage 2 (offline)** writes `registries.yaml` (mirrors+auth+CA), drops image pre‑warm list, installs RKE2 from cache, starts `rke2-{server|agent}`, runs verification.</li>
+<li>**Image mirroring** is handled by `pull-all.sh` (internet) and `push-all.sh` (air-gap), with `verify-mirror.sh` and `mirror-compare.sh` to assert presence.</li>
+<li>**Addons** (MetalLB + Contour) are shipped retagged to your registry. `make addons` can render the IP pool from `METALLB_POOL` and apply; `make whoami` deploys a test app and prints a `curl` line.</li>
+<li>**Ops**: `make verify`, `make doctor`, and a systemd timer for daily self-checks.</li>
+</ul>
+<br>
+<p>The framework is idempotent where possible: stage markers prevent accidental re‑runs; configuration is written to dedicated files and logs tracked in <code>\1</code>.</p>
+<h2>Design & how it works</h2>
+<h3>Design & how the framework works</h3>
+<br>
+<ul>
+<li>**Template mode (online once)** caches the official RKE2 installer to `/opt/rke2/get.rke2.sh` and primes Ubuntu 24.04 (modules/sysctls/swap).</li>
+<li>**Stage 1 (offline)** gathers role + static IP/DNS/GW (flags or prompts), writes netplan, applies OS tuning, reboots.</li>
+<li>**Stage 2 (offline)** writes `registries.yaml` (mirrors+auth+CA), drops image pre‑warm list, installs RKE2 from cache, starts `rke2-{server|agent}`, runs verification.</li>
+<li>**Image mirroring** is handled by `pull-all.sh` (internet) and `push-all.sh` (air-gap), with `verify-mirror.sh` and `mirror-compare.sh` to assert presence.</li>
+<li>**Addons** (MetalLB + Contour) are shipped retagged to your registry. `make addons` can render the IP pool from `METALLB_POOL` and apply; `make whoami` deploys a test app and prints a `curl` line.</li>
+<li>**Ops**: `make verify`, `make doctor`, and a systemd timer for daily self-checks.</li>
+</ul>
+<br>
+<h2>Checklist</h2>
+<ul>
+<li>DNS resolves <code>kuberegistry.dev.kube</code></li>
+<li>CA bundle PEM contains <code>CA:TRUE</code></li>
+<li>Template built, images mirrored</li>
+</ul>
+<h2>Template (online)</h2>
+<pre>make template VERSION=v1.33.4+rke2r1</pre>
+<h2>Stage 1</h2>
+<pre>make stage1 ROLE=server HOSTNAME=cp-01 IFACE=eno1 IP_CIDR=10.0.4.101/24 GW=10.0.4.1 DNS=10.0.0.10,1.1.1.1</pre>
+<h2>Stage 2</h2>
+<pre>make stage2 IMAGES_LIST=./rke2-mirror/lists/images.all.txt CA_BUNDLE=examples/kuberegistry-ca.crt</pre>
+<h2>Join agent</h2>
+<pre>sudo ./scripts/rke2-ubuntu-node.sh --role agent --server-url https://10.0.4.101:9345 --token-file /tmp/node-token \
+  --images ./rke2-mirror/lists/images.all.txt --ca ./examples/kuberegistry-ca.crt</pre>
+<h2>Addons</h2>
+<pre>kubectl apply -f examples/manifests/metallb-namespace.yaml
+kubectl apply -f examples/manifests/metallb-core.yaml
+kubectl apply -f examples/manifests/metallb-ipaddresspool.yaml
+kubectl apply -f examples/manifests/metallb-l2advertisement.yaml
+kubectl apply -f examples/manifests/contour-namespace.yaml
+kubectl apply -f examples/manifests/contour.yaml</pre>
+<h2>whoami</h2>
+<pre>kubectl apply -f examples/manifests/whoami-deploy.yaml
+kubectl apply -f examples/manifests/whoami-httpproxy.yaml</pre>
+</body></html>

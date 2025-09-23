@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: controller
+  namespace: metallb-system
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: metallb, component: controller } }
+  template:
+    metadata: { labels: { app: metallb, component: controller } }
+    spec:
+      serviceAccountName: controller
+      containers:
+      - name: controller
+        image: kuberegistry.dev.kube/rke2/quay.io/metallb/controller:v0.15.2
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: speaker
+  namespace: metallb-system
+spec:
+  selector: { matchLabels: { app: metallb, component: speaker } }
+  template:
+    metadata: { labels: { app: metallb, component: speaker } }
+    spec:
+      serviceAccountName: speaker
+      hostNetwork: true
+      containers:
+      - name: speaker
+        image: kuberegistry.dev.kube/rke2/quay.io/metallb/speaker:v0.15.2
+        securityContext:
+          capabilities:
+            add: ["NET_ADMIN","NET_RAW"]

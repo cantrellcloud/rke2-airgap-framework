@@ -1,0 +1,11 @@
+
+[Unit]
+Description=Daily RKE2 Air-Gap Doctor
+
+[Timer]
+OnCalendar=daily
+RandomizedDelaySec=30m
+Persistent=true
+
+[Install]
+WantedBy=timers.target
