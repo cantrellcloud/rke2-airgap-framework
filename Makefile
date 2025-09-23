@@ -14,11 +14,11 @@ HOSTNAME      ?= j64manager01
 IFACE         ?= 
 IP_CIDR       ?= 10.0.4.101/24
 GW            ?= 10.0.4.1
-DNS           ?= 10.0.0.10,1.1.1.1
+DNS           ?= 10.0.1.34,10.231.1.34
 
 SERVER_URL    ?= https://10.0.4.101:9345
 TOKEN_FILE    ?= /tmp/node-token
-METALLB_POOL  ?= 10.0.4.200-10.0.4.220
+METALLB_POOL  ?= 10.0.4.50-10.0.4.59
 WHOAMI_HOST   ?= demo.dev.kube
 
 DEST_ROOT     ?= $(REGISTRY_ROOT)
